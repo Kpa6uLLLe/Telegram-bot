@@ -1,8 +1,13 @@
 ﻿
-class Program
+namespace telebot
 {
-
-    public static void Main(string[] args)
+    class Program
     {
+        public static void Main(string[] args)
+        {
+            var application = new Application();
+            application.Run(args);
+        }
+
     }
 }
