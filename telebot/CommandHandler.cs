@@ -12,7 +12,8 @@ namespace telebot
         private CommandRepository commandRepository;
        public CommandHandler(IChat chat, IStorage storage)
         {
-            this.commandFactory = new CommandFactory();
+            commandFactory = new CommandFactory();
+            commandRepository = new CommandRepository();
         }
     }
 }

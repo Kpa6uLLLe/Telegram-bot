@@ -8,6 +8,13 @@ namespace telebot
 {
     internal class TelegramBotApiChatHander : IChat 
     {
+        private string token = "";
+        public TelegramBotApiChatHander()
+        {
+            AppSettings settings = new AppSettings();
+            token = settings.GetToken();
+
+        }
         public void NewChatMessageReceived()
         {
 
