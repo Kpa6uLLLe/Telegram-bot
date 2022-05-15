@@ -10,10 +10,39 @@ namespace telebot
     {
         private CommandFactory commandFactory;
         private CommandRepository commandRepository;
-       public CommandHandler(IChat chat, IStorage storage)
+        private IChat _chat;
+        private bool IsWaitingUserInput = false;
+        public CommandHandler(IStorage storage)
         {
             commandFactory = new CommandFactory();
             commandRepository = new CommandRepository();
         }
+        public void SetIChat(IChat chat)
+        {
+            _chat = chat;
+        }
+
+        public CommandRepository ProcessNewMessage(CustomUpdate update)
+        {
+            var response = new CommandRepository();
+            if (update.Message.Text[0] == '/' && !IsWaitingUserInput)
+            {
+                response = commandFactory.ProcessNewCommand(update);
+
+            }
+            else if (update.Message.Text[0] != '/' && IsWaitingUserInput)
+            {
+                response = commandFactory.ProcessNewUserInput(update);
+                
+            }
+            IsWaitingUserInput = response.IsWaitingUserInput;
+            //Сделать базовый commandRepository с сообщением об ошибке
+            return response;
+
+        }
+
+
+
+
     }
 }
