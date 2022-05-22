@@ -12,15 +12,42 @@ namespace telebot
             "/store-link",
             "/get-links"
         };
-
+        public static readonly string[] restrictedCategories =
+        {
+            "",
+            String.Empty,
+            "Все",
+            "Всё",
+            "All"
+        };
+        private CommandRepository? awaitingCommand = null;
+        private string selectedCategoria = string.Empty;
         public CommandRepository ProcessNewCommand(CustomUpdate update)
         {
             //Фабрика команд
             var response = new CommandRepository();
-            if (possibleCommands.Contains(update.Message.Text))
+            if (!possibleCommands.Contains(update.Message.Text))
             {
-                response.OK = true;
-                response.commandName = update.Message.Text; 
+                return response;
+            }
+
+            response.OK = true;
+            response.commandName = update.Message.Text; 
+            
+            switch (response.commandName)
+            {
+                case "/store-link":
+                    response.message = "Пожалуйста, выберите категорию из списка или введите название для новой категории";
+                    awaitingCommand = response;
+                    break;
+                case "/get-links":
+                    response.message = "Пожалуйста, выберите категорию из списка";
+                    awaitingCommand = response;
+                    break;
+                default:
+                    response = new CommandRepository();
+                    awaitingCommand = null;
+                    break;
             }
             return response;
             

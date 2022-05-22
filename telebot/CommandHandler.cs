@@ -12,8 +12,10 @@ namespace telebot
         private CommandRepository commandRepository;
         private IChat _chat;
         private bool IsWaitingUserInput = false;
+        private IStorage _storage;
         public CommandHandler(IStorage storage)
         {
+            _storage = storage;
             commandFactory = new CommandFactory();
             commandRepository = new CommandRepository();
         }

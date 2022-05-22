@@ -33,9 +33,15 @@ namespace telebot
         {
             var response = _commandHandler.ProcessNewMessage(update);
             if (response.OK)
+            {
                 Console.WriteLine($"Successfully handled '{response.commandName}' from {update.Message.Chat.FirstName} {_update.Message.Chat.LastName}");
+                await PostMessageToChat(response.message);
+            }
             else
+            {
                 Console.WriteLine($"Incorrect input in chat#{_update.Message.Chat.Id}");
+                Console.WriteLine(response.commandError.GetErrorInfo());
+            }
 
 
         }
@@ -43,7 +49,7 @@ namespace telebot
         public async Task PostMessageToChat(string message)
         {
             await botClient.SendTextMessageAsync(_update.Message.Chat,message);
-            Console.WriteLine($"Sent message: '{_update.Message.Text}' to {_update.Message.Chat.LastName} {_update.Message.Chat.LastName} in chat#{_update.Message.Chat.Id}");
+            Console.WriteLine($"Sent message: '{message}' to {_update.Message.Chat.FirstName} {_update.Message.Chat.LastName} in chat#{_update.Message.Chat.Id}");
         }
 
         public async Task Start()
