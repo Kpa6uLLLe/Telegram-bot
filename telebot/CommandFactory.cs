@@ -8,7 +8,7 @@ namespace telebot
 {
     internal class CommandFactory
     {
-        public static readonly string[] possibleCommans = {
+        public static readonly string[] possibleCommands = {
             "/store-link",
             "/get-links"
         };
@@ -17,7 +17,7 @@ namespace telebot
         {
             //Фабрика команд
             var response = new CommandRepository();
-            if (possibleCommans.Contains(update.Message.Text))
+            if (possibleCommands.Contains(update.Message.Text))
             {
                 response.OK = true;
                 response.commandName = update.Message.Text; 
