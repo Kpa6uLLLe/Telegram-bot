@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Collections;
 namespace telebot
 {
     class CommandHandler
@@ -11,8 +11,9 @@ namespace telebot
         private CommandFactory commandFactory;
         private CommandRepository commandRepository;
         private IChat _chat;
-        private bool IsWaitingUserInput = false;
+        private Command currentCommand;
         private IStorage _storage;
+
         public CommandHandler(IStorage storage)
         {
             _storage = storage;
@@ -24,22 +25,24 @@ namespace telebot
             _chat = chat;
         }
 
-        public CommandRepository ProcessNewMessage(CustomUpdate update)
+        public Command ProcessNewMessage(CustomUpdate update)
         {
-            var response = new CommandRepository();
-            if (update.Message.Text[0] == '/' && !IsWaitingUserInput)
+            currentCommand = commandRepository.Get(update.Message.Chat.Id);
+            if (currentCommand == null)
+                currentCommand = new Command();
+
+            if (update.Message.Text[0] == '/' && !currentCommand.IsWaitingUserInput)
             {
-                response = commandFactory.ProcessNewCommand(update);
+                currentCommand = commandFactory.ProcessNewCommand(update);
 
             }
-            else if (update.Message.Text[0] != '/' && IsWaitingUserInput)
+            else if (update.Message.Text[0] != '/' && currentCommand.IsWaitingUserInput)
             {
-                response = commandFactory.ProcessNewUserInput(update);
+                currentCommand = commandFactory.ProcessNewUserInput(update);
                 
             }
-            IsWaitingUserInput = response.IsWaitingUserInput;
             //Сделать базовый commandRepository с сообщением об ошибке
-            return response;
+            return currentCommand;
 
         }
 

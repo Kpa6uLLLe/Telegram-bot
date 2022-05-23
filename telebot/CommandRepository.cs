@@ -3,19 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections;
+using Microsoft.EntityFrameworkCore;
 
 namespace telebot
 {
-    internal class CommandRepository
+    internal class CommandRepository : ICommandRepository
     {
-        public bool OK { get; set; } = false;
-        public bool IsWaitingUserInput { get; set; } = false;
-        public string commandName { get; set; } = "/";
+        Dictionary<long, Command> _commands;
+        public CommandRepository()
+        {
+            _commands = new Dictionary<long, Command>();
+        }
+        public Command Get(long userId)
+        {
+            if(_commands.ContainsKey(userId))
+            return _commands[userId];
+            return null;
+        }
 
-        public string namePostfix { get; set; } = string.Empty;
-
-        public string message { get; set; } = string.Empty;
-
-        public CommandError commandError = new CommandError();
+        public void Add(Command command, long userId)
+        {
+            _commands.Add(userId, command);
+        }
+        public void Remove(long userId)
+        {
+           _commands.Remove(userId);
+        }
     }
 }

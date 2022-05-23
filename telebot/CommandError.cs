@@ -1,7 +1,7 @@
 ﻿
 namespace telebot
 {
-    internal class CommandError
+    public class CommandError
     {
         public string errorName { get; set; } = "Unknown Error";
         public string errorDescription { get; set; } = "We don't know what happened";
