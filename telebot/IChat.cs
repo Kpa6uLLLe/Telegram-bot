@@ -8,11 +8,12 @@ namespace telebot
 {
     public interface IChat
     {
-        public void NewChatMessageReceived();
 
-        public void PostMessageToChat();
+        public Task NewChatMessageReceived(CustomUpdate update);
 
-        public void Start();
+        public Task PostMessageToChat(string message);
+
+        public Task Start();
 
         public void Stop();
 

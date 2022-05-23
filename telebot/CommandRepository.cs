@@ -8,5 +8,8 @@ namespace telebot
 {
     internal class CommandRepository
     {
+        public bool OK { get; set; } = false;
+        public bool IsWaitingUserInput { get; set; } = false;
+        public string commandName { get; set; } = "/";
     }
 }
