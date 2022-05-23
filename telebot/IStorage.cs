@@ -8,9 +8,13 @@ namespace telebot
 {
     public interface IStorage
     {
-        public StorageEntity GetEntity();
+        public StorageEntity GetEntity(string name);
         public void StoreEntity(StorageEntity storageEntity);
 
-        public StorageEntity[] GetEntityList();
+        public Dictionary<string, StorageEntity> GetEntityList();
+
+        public string GetEntityNames();
+        public string GetLinkList(string categoryName);
+        public string GetEntityList(string categoryName);
     }
 }

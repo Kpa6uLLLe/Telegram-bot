@@ -3,27 +3,59 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Collections;
 namespace telebot
 {
     public class MemoryStorage : IStorage
     {
-         private List<StorageEntity> storageEntities = new List<StorageEntity>(0);
+         private Dictionary<string, StorageEntity> entities = new Dictionary<string, StorageEntity>();
 
-        public StorageEntity GetEntity()
+        public MemoryStorage()
         {
-
-
-            return new StorageEntity();
+        }
+        public StorageEntity GetEntity(string name)
+        {
+            if(entities.ContainsKey(name))
+            return entities[name];
+            return null;
         }
 
-        public StorageEntity[] GetEntityList()
+        public Dictionary<string, StorageEntity> GetEntityList()
         {
-            return new StorageEntity[0];
+            return entities;
         }
-        public void StoreEntity(StorageEntity storageEntity)
+        public string GetEntityNames()
         {
-            storageEntities.Add(storageEntity);
+            string names = "\n";
+            foreach(System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities)
+            {
+                names += entity.Key + "\n";
+            }
+            return names;
         }
+        public string GetLinkList(string categoryName)
+        {
+            StorageEntity storageEntity = GetEntity(categoryName);
+            if (storageEntity==null) return null;
+            return storageEntity.GetLinksString();
+        }
+        public string GetEntityList(string categoryName)
+        {
+            string result = "\nВсе ссылки:\n";
+            foreach (System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities)
+            {
+                result+= "\t" + entity.Value.GetLinksString() + "\n";
+            }
+            return result;
+        }
+            public void StoreEntity(StorageEntity storageEntity)
+        {
+            if(!entities.ContainsKey(storageEntity.Name))
+                entities.Add(storageEntity.Name, storageEntity);
+            else
+                entities[storageEntity.Name] = storageEntity;
+            
+        }
+
     }
 }

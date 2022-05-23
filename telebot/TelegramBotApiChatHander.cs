@@ -41,6 +41,8 @@ namespace telebot
             {
                 Console.WriteLine($"Incorrect input in chat#{_update.Message.Chat.Id}");
                 Console.WriteLine(response.commandError.GetErrorInfo());
+                if(response.commandError.errorDescription != string.Empty)
+                await PostMessageToChat(response.commandError.GetMessageForUser());
             }
 
 

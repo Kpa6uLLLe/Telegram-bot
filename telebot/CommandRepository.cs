@@ -21,7 +21,10 @@ namespace telebot
             return _commands[userId];
             return null;
         }
-
+        public void Replace(Command command, long userId)
+        {
+            _commands[userId] = command;
+        }
         public void Add(Command command, long userId)
         {
             _commands.Add(userId, command);
