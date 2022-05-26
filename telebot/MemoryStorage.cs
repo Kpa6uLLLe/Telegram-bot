@@ -8,54 +8,62 @@ namespace telebot
 {
     public class MemoryStorage : IStorage
     {
-         private Dictionary<string, StorageEntity> entities = new Dictionary<string, StorageEntity>();
+        private Dictionary<long, Dictionary<string, StorageEntity>> entities = new Dictionary<long, Dictionary<string, StorageEntity>>();
 
         public MemoryStorage()
         {
         }
-        public StorageEntity GetEntity(string name)
+        public StorageEntity GetEntity(string name, long userId)
         {
-            if(entities.ContainsKey(name))
-            return entities[name];
+            if (!entities.ContainsKey(userId))
+                return null;
+            if (entities[userId].ContainsKey(name))
+                return entities[userId][name];
             return null;
         }
 
-        public Dictionary<string, StorageEntity> GetEntityList()
+        public Dictionary<long, Dictionary<string, StorageEntity>> GetEntityList()
         {
             return entities;
         }
-        public string GetEntityNames()
+        public string GetEntityNames(long userId)
         {
             string names = "\n";
-            foreach(System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities)
+            foreach (System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities[userId])
             {
                 names += entity.Key + "\n";
             }
             return names;
         }
-        public string GetLinkList(string categoryName)
+        public string GetLinkList(string categoryName, long userId)
         {
-            StorageEntity storageEntity = GetEntity(categoryName);
-            if (storageEntity==null) return null;
+            StorageEntity storageEntity = GetEntity(categoryName, userId);
+            if (storageEntity == null) return null;
             return storageEntity.GetLinksString();
         }
-        public string GetEntityList(string categoryName)
+        public string GetEntityList(string categoryName, long userId)
         {
             string result = "\nВсе ссылки:\n";
-            foreach (System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities)
+            foreach (System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities[userId])
             {
-                result+= "\t" + entity.Value.GetLinksString() + "\n";
+                result += "\t" + entity.Value.GetLinksString() + "\n";
             }
             return result;
         }
-            public void StoreEntity(StorageEntity storageEntity)
+        public void StoreEntity(StorageEntity storageEntity, long userId)
         {
-            if(!entities.ContainsKey(storageEntity.Name))
-                entities.Add(storageEntity.Name, storageEntity);
+            if (!entities.ContainsKey(userId))
+                entities.Add(userId, new Dictionary<string, StorageEntity>());
+            if (!entities[userId].ContainsKey(storageEntity.Name))
+                entities[userId].Add(storageEntity.Name, storageEntity);
             else
-                entities[storageEntity.Name] = storageEntity;
-            
-        }
+                entities[userId][storageEntity.Name] = storageEntity;
 
+        }
+        public void CreateNewUser(long userId)
+        {
+            if (!entities.ContainsKey(userId))
+                entities.Add(userId, new Dictionary<string, StorageEntity>());
+        }
     }
 }

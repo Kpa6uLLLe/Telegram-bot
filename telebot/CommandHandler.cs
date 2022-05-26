@@ -28,8 +28,11 @@ namespace telebot
         public Command ProcessNewMessage(CustomUpdate update)
         {
             currentCommand = commandRepository.Get(update.Message.Chat.Id);
-
-            
+            if(update.IsUserNew)
+            {
+                _storage.CreateNewUser(update.Message.Chat.Id);
+                update.IsUserNew = false;
+            }
 
             if (currentCommand == null)
             {
@@ -59,20 +62,20 @@ namespace telebot
             {
                 if (currentCommand.commandName == "/get-links")
                     currentCommand.message += "\nВсе";
-                currentCommand.message += _storage.GetEntityNames();
+                currentCommand.message += _storage.GetEntityNames(update.Message.Chat.Id);
                 currentCommand.categoryListNeeded = false;
             }
 
             if (currentCommand.link != string.Empty && currentCommand.commandName == "/store-link")
             {
-                StorageEntity linkData = _storage.GetEntity(currentCommand.category);
+                StorageEntity linkData = _storage.GetEntity(currentCommand.category, update.Message.Chat.Id);
                 if (linkData == null)
                 {
                     linkData = new StorageEntity();
                     linkData.Name = currentCommand.category;
                 }
                 linkData.AddLink(currentCommand.link);
-                _storage.StoreEntity(linkData);
+                _storage.StoreEntity(linkData, update.Message.Chat.Id);
                 currentCommand.Complete("Дело сделано");
             }
 
@@ -83,11 +86,11 @@ namespace telebot
                     case "":
                         break;
                     case "Все":
-                        currentCommand.message = _storage.GetEntityList(currentCommand.category);
+                        currentCommand.message = _storage.GetEntityList(currentCommand.category, update.Message.Chat.Id);
                         currentCommand.Complete();
                         break;
                     default:
-                        StorageEntity entity = _storage.GetEntity(currentCommand.category);
+                        StorageEntity entity = _storage.GetEntity(currentCommand.category, update.Message.Chat.Id);
                         if (entity != null)
                         {
                             currentCommand.message = entity.GetLinksString();
