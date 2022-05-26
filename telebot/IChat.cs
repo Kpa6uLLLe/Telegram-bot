@@ -11,7 +11,7 @@ namespace telebot
 
         public Task NewChatMessageReceived(CustomUpdate update);
 
-        public Task PostMessageToChat(string message);
+        public Task PostMessageToChat(string message, CustomUpdate update);
 
         public Task Start();
 
