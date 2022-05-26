@@ -10,7 +10,9 @@ namespace telebot
     {
         public static readonly string[] possibleCommands = {
             "/store-link",
-            "/get-links"
+            "/get-links",
+            "/help",
+            "/start"
         };
         public static readonly string[] restrictedCategories =
         {
@@ -20,6 +22,13 @@ namespace telebot
             "Всё",
             "All"
         };
+        private string GetCommandList()
+        {
+            string list = "";
+            foreach (string command in possibleCommands)
+                list+=command+ "\n";
+            return list;
+        }
         private Command? awaitingCommand = null;
         public Command ProcessNewCommand(CustomUpdate update)
         {
@@ -46,6 +55,12 @@ namespace telebot
                     response.categoryListNeeded = true;
                     response.IsWaitingUserInput = true;
                     awaitingCommand = response;
+                    break;
+                case "/help":
+                    response.message = "Список команд:\n" + GetCommandList();
+                    break;
+                case "/start":
+                    response.message = "Привет!\n Вот список команд:\n" + GetCommandList();
                     break;
                 default:
                     response = new Command();

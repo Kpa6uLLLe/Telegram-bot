@@ -9,7 +9,7 @@ namespace telebot
     public class StorageEntity
     {
         private string name = "";
-        private List<string> LinkList = new List<string>(5);
+        private List<string> LinkList = new List<string>(0);
         public string AddLink(string link)
         {
             LinkList.Add(link);

@@ -33,7 +33,7 @@ namespace telebot
             var response = _commandHandler.ProcessNewMessage(update);
             if (response.OK)
             {
-                Console.WriteLine($"Successfully handled '{response.commandName}' from {update.Message.Chat.FirstName} {update.Message.Chat.LastName}");
+                Console.WriteLine($"Successfully handled '{response.commandName} {response.category} {response.link}' from {update.Message.Chat.FirstName} {update.Message.Chat.LastName}");
                 await PostMessageToChat(response.message, update);
             }
             else

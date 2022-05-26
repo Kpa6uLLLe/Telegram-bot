@@ -55,7 +55,9 @@ namespace telebot
             if (!entities.ContainsKey(userId))
                 entities.Add(userId, new Dictionary<string, StorageEntity>());
             if (!entities[userId].ContainsKey(storageEntity.Name))
+            {
                 entities[userId].Add(storageEntity.Name, storageEntity);
+            }
             else
                 entities[userId][storageEntity.Name] = storageEntity;
 
