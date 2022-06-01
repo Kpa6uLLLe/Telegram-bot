@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace telebot
+namespace telebot.Interfaces
 {
-    internal class MainController
+    internal class IDBStorage
     {
-        LinkData[] LDArray;
     }
 }
