@@ -11,8 +11,8 @@ using telebot;
 namespace telebot.Migrations
 {
     [DbContext(typeof(ULinksContext))]
-    [Migration("20220531204320_Nickname+Pswd")]
-    partial class NicknamePswd
+    [Migration("20220602000231_D1")]
+    partial class D1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,23 +28,50 @@ namespace telebot.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<long>("UserId")
+                    b.Property<long>("UserLocalId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Name");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserLocalId");
 
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("telebot.User", b =>
+            modelBuilder.Entity("telebot.Link", b =>
                 {
-                    b.Property<long>("UserId")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("UserId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("UserLocalId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryName");
+
+                    b.HasIndex("UserLocalId");
+
+                    b.ToTable("Links");
+                });
+
+            modelBuilder.Entity("telebot.User", b =>
+                {
+                    b.Property<long>("LocalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("LocalId"), 1L, 1);
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -62,7 +89,10 @@ namespace telebot.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserId");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("LocalId");
 
                     b.ToTable("Users");
                 });
@@ -71,9 +101,26 @@ namespace telebot.Migrations
                 {
                     b.HasOne("telebot.User", "User")
                         .WithMany("Categories")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserLocalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("telebot.Link", b =>
+                {
+                    b.HasOne("telebot.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryName");
+
+                    b.HasOne("telebot.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserLocalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
 
                     b.Navigation("User");
                 });

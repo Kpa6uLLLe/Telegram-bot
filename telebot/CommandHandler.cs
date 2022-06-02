@@ -28,18 +28,18 @@ namespace telebot
         public Command ProcessNewMessage(CustomUpdate update)
         {
             currentCommand = commandRepository.Get(update.Message.Chat.Id);
-            if(update.IsUserNew)
-            {
-                _storage.CreateNewUser(update.Message.Chat.Id);
-                update.IsUserNew = false;
-            }
+
+            
 
             if (currentCommand == null)
             {
                 currentCommand = new Command();
                 commandRepository.Add(currentCommand, update.Message.Chat.Id);
             }
-
+            if (!_storage.UserExist(update.Message.Chat.Id) && currentCommand.commandName!="/auth")
+            {
+                update.Message.Text = "/auth";
+            }
             if (update.Message.Text[0] == '/' && !currentCommand.IsWaitingUserInput)
             {
                 currentCommand = commandFactory.ProcessNewCommand(update);
@@ -78,15 +78,27 @@ namespace telebot
                 _storage.StoreEntity(linkData, update.Message.Chat.Id);
                 currentCommand.Complete("Дело сделано");
             }
+            if (currentCommand.commandName == "/auth" && currentCommand.category != String.Empty)
+            {
+                switch (currentCommand.link)
+                {
+                    case "":
+                        break;
+                    default:
+                        _storage.CreateNewUser(update.Message.Chat.Id, update.Message.Chat.FirstName, update.Message.Chat.LastName, currentCommand.category, currentCommand.link);
+                        currentCommand.Complete("Вы зарегистрированы");
+                        break;
 
-            if(currentCommand.commandName == "/get-links")
+                }
+            }
+                if (currentCommand.commandName == "/get-links")
             {
                 switch (currentCommand.category)
                 {
                     case "":
                         break;
                     case "Все":
-                        currentCommand.message = _storage.GetEntityList(currentCommand.category, update.Message.Chat.Id);
+                        currentCommand.message = _storage.GetEntityList(update.Message.Chat.Id);
                         currentCommand.Complete();
                         break;
                     default:
