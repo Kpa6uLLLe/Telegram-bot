@@ -36,9 +36,15 @@ namespace telebot
                 currentCommand = new Command();
                 commandRepository.Add(currentCommand, update.Message.Chat.Id);
             }
-            if (!_storage.UserExist(update.Message.Chat.Id) && currentCommand.commandName!="/auth")
+            if (!_storage.UserExist(update.Message.Chat.Id) && currentCommand.commandName!= "/register")
             {
-                update.Message.Text = "/auth";
+                update.Message.Text = "/register";
+            }
+            if(_storage.UserExist(update.Message.Chat.Id) && (currentCommand.commandName == "/register" || update.Message.Text == "/register"))
+            {
+                currentCommand.Error("You've already registered!");
+                commandRepository.Remove(update.Message.Chat.Id);
+                return currentCommand;
             }
             if (update.Message.Text[0] == '/' && !currentCommand.IsWaitingUserInput)
             {
@@ -78,7 +84,7 @@ namespace telebot
                 _storage.StoreEntity(linkData, update.Message.Chat.Id);
                 currentCommand.Complete("Дело сделано");
             }
-            if (currentCommand.commandName == "/auth" && currentCommand.category != String.Empty)
+            if (currentCommand.commandName == "/register" && currentCommand.category != String.Empty)
             {
                 switch (currentCommand.link)
                 {

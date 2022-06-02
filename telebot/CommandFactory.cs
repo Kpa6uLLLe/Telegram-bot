@@ -13,7 +13,7 @@ namespace telebot
             "/get-links",
             "/help",
             "/start",
-            "/auth"
+            "/register"
         };
         public static readonly string[] restrictedCategories =
         {
@@ -63,8 +63,8 @@ namespace telebot
                 case "/start":
                     response.message = "Привет!\n Вот список команд:\n" + GetCommandList();
                     break;
-                case "/auth":
-                    response.message = "Пожалуйста, введите свой никнэйм:\n";
+                case "/register":
+                    response.message = "Чтобы пользоваться функциями бота, нужно зарегистрироваться.\nПожалуйста, придумайте никнейм:\n";
                     response.IsWaitingUserInput = true;
                     awaitingCommand = response;
                     break;
@@ -99,7 +99,7 @@ namespace telebot
                         break;
                     case "/get-links":
                         break;
-                    case "/auth":
+                    case "/register":
                         awaitingCommand.message = "Пожалуйста, введите пароль";
                         break;
                     default:
@@ -116,7 +116,7 @@ namespace telebot
                     case "/store-link":
                         awaitingCommand.link = update.Message.Text;
                         break;
-                    case "/auth":
+                    case "/register":
                         awaitingCommand.link = update.Message.Text;
                         break;
                     default:
