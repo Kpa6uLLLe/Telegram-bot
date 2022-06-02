@@ -41,7 +41,7 @@ namespace telebot
             if (storageEntity == null) return null;
             return storageEntity.GetLinksString();
         }
-        public string GetEntityList(string categoryName, long userId)
+        public string GetEntityList(long userId)
         {
             string result = "\nВсе ссылки:\n";
             foreach (System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities[userId])
@@ -62,10 +62,14 @@ namespace telebot
                 entities[userId][storageEntity.Name] = storageEntity;
 
         }
-        public void CreateNewUser(long userId)
+        public void CreateNewUser(long userId, string firstName, string lastName, string nickname ="",string pswd="")
         {
             if (!entities.ContainsKey(userId))
                 entities.Add(userId, new Dictionary<string, StorageEntity>());
+        }
+        public bool UserExist(long userId)
+        {
+            return entities.ContainsKey(userId);
         }
     }
 }

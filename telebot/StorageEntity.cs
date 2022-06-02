@@ -24,6 +24,14 @@ namespace telebot
             }
             return "Success";
         }
+        public string AddLinks(List<string> link)
+        {
+            foreach (string linkItem in link)
+            {
+                AddLink(linkItem);
+            }
+            return "Success";
+        }
         public List<string> GetLinks()
         {
             return LinkList;

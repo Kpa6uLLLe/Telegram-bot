@@ -15,8 +15,10 @@ namespace telebot
 
         public string GetEntityNames(long userId);
         public string GetLinkList(string categoryName, long userId);
-        public string GetEntityList(string categoryName, long userId);
+        public string GetEntityList( long userId);
 
-        public void CreateNewUser(long userId);
+        public void CreateNewUser(long userId, string firstName, string lastName, string nickname, string password);
+
+        public bool UserExist(long userId);
     }
 }
