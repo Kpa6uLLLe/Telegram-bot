@@ -26,12 +26,12 @@ namespace telebot.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<long>("UserLocalId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Name");
 
-                    b.HasIndex("UserLocalId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories");
                 });
@@ -51,25 +51,25 @@ namespace telebot.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("UserLocalId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryName");
 
-                    b.HasIndex("UserLocalId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Links");
                 });
 
             modelBuilder.Entity("telebot.User", b =>
                 {
-                    b.Property<long>("LocalId")
+                    b.Property<long>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("LocalId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("UserId"), 1L, 1);
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -87,10 +87,7 @@ namespace telebot.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("LocalId");
+                    b.HasKey("UserId");
 
                     b.ToTable("Users");
                 });
@@ -99,7 +96,7 @@ namespace telebot.Migrations
                 {
                     b.HasOne("telebot.User", "User")
                         .WithMany("Categories")
-                        .HasForeignKey("UserLocalId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -114,7 +111,7 @@ namespace telebot.Migrations
 
                     b.HasOne("telebot.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserLocalId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

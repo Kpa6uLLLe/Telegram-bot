@@ -23,7 +23,7 @@ namespace telebot
         {
             Open();
             List<string> list = new List<string>(0);
-            string sqlc = $"SELECT Url FROM Links WHERE CategoryName = {categoryName} AND UserId = {userId}";
+            string sqlc = $"SELECT Url FROM Links WHERE CategoryName = '{categoryName}' AND UserId = '{userId}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
             while(reader.Read())
@@ -39,7 +39,7 @@ namespace telebot
             Open();
             List<string> list = new List<string>(0);
             list.Add(ALL_LINKS);
-            string sqlc = $"SELECT Name FROM Categories WHERE UserId = {userId}";
+            string sqlc = $"SELECT Name FROM Categories WHERE UserId = '{userId}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
             while (reader.Read())
@@ -64,7 +64,7 @@ namespace telebot
         {
             bool result = true;
             Open();
-            string sqlc = $"SELECT UserId FROM Users WHERE UserId = {userId}";
+            string sqlc = $"SELECT UserId FROM Users WHERE UserId = '{userId}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
             if (!reader.HasRows)
@@ -76,15 +76,17 @@ namespace telebot
         }
         private bool CategoryExist(string name, long userId)
         {
+            bool result = true;
             Open();
-            string sqlc = $"SELECT Name FROM Categories WHERE UserId = {userId} AND Name = {name}";
+            string sqlc = $"SELECT Name FROM Categories WHERE UserId = '{userId}' AND Name = '{name}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
-            if (reader.FieldCount == 0)
-                return false;
+            if (!reader.HasRows)
+                result = false;
+
             reader.Close();
             Close();
-            return true;
+            return result;
         }
         public StorageEntity GetEntity(string name, long userId)
         {
@@ -108,7 +110,7 @@ namespace telebot
         {
             string names = "\n";
             Open();
-            string sqlc = $"SELECT Name FROM Categories WHERE UserId = {userId}";
+            string sqlc = $"SELECT Name FROM Categories WHERE UserId = '{userId}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
             while (reader.Read())
@@ -131,7 +133,9 @@ namespace telebot
             List<string> categories = GetCategoriesListDB(userId);
             foreach (string category in categories)
             {
-                result += "\t" + GetEntity(category, userId).GetLinksString() + "\n";
+                StorageEntity entity = GetEntity(category, userId);
+                if (entity != null)
+                result += "\t" + entity.GetLinksString() + "\n";
             }
             /*foreach (System.Collections.Generic.KeyValuePair<string, StorageEntity> entity in entities[userId])
             {
@@ -146,13 +150,13 @@ namespace telebot
                 return;
             if(!CategoryExist(storageEntity.Name,userId))
             {
-                Open();
-                string sqlc = $"INSERT INTO Categories VALUES ({storageEntity.Name},{userId});";
+                Open(); 
+                string sqlc = $"INSERT INTO Categories(Name,UserId) VALUES ('{storageEntity.Name}','{userId}')";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
                 foreach(string link in linkList)
                 {
-                    sqlc = $"INSERT INTO Links(Url,CategoryName,UserId) VALUES ({link},{storageEntity.Name},{userId});";
+                    sqlc = $"INSERT INTO Links(Url,CategoryName,UserId) VALUES ('{link}','{storageEntity.Name}','{userId}')";
                     sqlCommand = new SqlCommand(sqlc, _connection);
                     sqlCommand.ExecuteNonQuery();
                 }
@@ -161,21 +165,29 @@ namespace telebot
             else
             {
                 Open();
-                string sqlc = $"SELECT Url FROM Links WHERE UserId = {userId} AND CategoryName = {storageEntity.Name}";
+                string sqlc = $"SELECT Url FROM Links WHERE UserId = '{userId}' AND CategoryName = '{storageEntity.Name}'";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
                 SqlDataReader reader = sqlCommand.ExecuteReader();
                 while (reader.Read())
                 {
                     string url = reader[0].ToString();
-                    if (!linkList.Contains(url))
+                    if (linkList.Contains(url))
                     {
-                        sqlc = $"INSERT INTO Links(Url,CategoryName,UserId) VALUES ({url},{storageEntity.Name},{userId});";
-                        sqlCommand = new SqlCommand(sqlc, _connection);
-                        sqlCommand.ExecuteNonQuery();
+                        linkList.Remove(url);
+
                     }
 
                 }
                 reader.Close();
+
+                foreach (string link in linkList)
+                {
+
+                    sqlc = $"INSERT INTO Links(Url,CategoryName,UserId) VALUES ('{link}','{storageEntity.Name}','{userId}')";
+                    sqlCommand = new SqlCommand(sqlc, _connection);
+                    sqlCommand.ExecuteNonQuery();
+                }
+                
                 Close();
                 }
             /*if (!entities[userId].ContainsKey(storageEntity.Name))
@@ -191,13 +203,12 @@ namespace telebot
             if (!UserExist(userId))
             {
                 Open();
-                string sqlc = $"INSERT INTO Users VALUES (@UserId,@FirstName,@LastName,@Nickname,@Password)";
+                 
+                string sqlc = "SET IDENTITY_INSERT Users ON";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
-                sqlCommand.Parameters.AddWithValue("@UserId", userId);
-                sqlCommand.Parameters.AddWithValue("@FirstName", firstName);
-                sqlCommand.Parameters.AddWithValue("@LastName", lastName);
-                sqlCommand.Parameters.AddWithValue("@Nickname", nickname);
-                sqlCommand.Parameters.AddWithValue("@Password", password);
+                sqlCommand.ExecuteNonQuery();
+                sqlc = $"INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}')";
+                sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
                 Close();
 

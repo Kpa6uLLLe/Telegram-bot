@@ -29,7 +29,13 @@ namespace telebot
             DbPath = settings.GetDBPath();
         }
 
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasAlternateKey(u => u.UserId);
+            modelBuilder.Entity<Category>()
+                .HasAlternateKey(u => u.Name);
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlServer(DbPath);
     }
@@ -44,7 +50,6 @@ namespace telebot
     }
     public class Category
     {
-        [Key]
         public string Name { get; set; } = "";
         
         public User User { get; set; }
@@ -57,9 +62,6 @@ namespace telebot
         public string LastName { get; set; } = string.Empty;
 
         public List<Category> Categories { get; set; } = new();
-
-        [Key]
-        public long LocalId { get; set; }
         public long UserId { get; set; }
         public string Nickname { get; set; }
         public string Password { get; set; }
