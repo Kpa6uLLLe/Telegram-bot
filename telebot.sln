@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "telebot", "telebot\telebot.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp", "WebApp\WebApp.csproj", "{1516EC4C-2CEB-435A-BC1F-463FE918CC3D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tgBOT", "tgBOT\tgBOT.csproj", "{D54FC842-C392-483C-BC69-3B5058E18A7E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1516EC4C-2CEB-435A-BC1F-463FE918CC3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1516EC4C-2CEB-435A-BC1F-463FE918CC3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1516EC4C-2CEB-435A-BC1F-463FE918CC3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D54FC842-C392-483C-BC69-3B5058E18A7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D54FC842-C392-483C-BC69-3B5058E18A7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D54FC842-C392-483C-BC69-3B5058E18A7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D54FC842-C392-483C-BC69-3B5058E18A7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

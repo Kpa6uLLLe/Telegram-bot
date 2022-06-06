@@ -11,18 +11,28 @@ namespace telebot
 {
     public class DBSqlServerStorage : IStorage
     {
-        private Dictionary<long, Dictionary<string, StorageEntity>> _entities = new Dictionary<long, Dictionary<string, StorageEntity>>();
+        
         private SqlConnection _connection;
         private const string ALL_LINKS = "Все";
+        private ULinksContext _context;
 
         public DBSqlServerStorage(SqlConnection sqlConnection)
         {
             _connection = sqlConnection;
+            _context = new ULinksContext();
         }
         private List<string> GetLinksDB(string categoryName, long userId)
         {
-            Open();
             List<string> list = new List<string>(0);
+            var links = _context.Links.
+                Where(l => (l.User.UserId == userId && l.Category.Name == categoryName))
+                .ToList();
+            foreach (Link link in links)
+            {
+                list.Add(link.Url);
+            }
+            return list;
+            Open();
             string sqlc = $"SELECT Url FROM Links WHERE CategoryName = '{categoryName}' AND UserId = '{userId}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
@@ -104,7 +114,7 @@ namespace telebot
 
         public Dictionary<long, Dictionary<string, StorageEntity>> GetEntityList()
         {
-            return _entities;
+            return new Dictionary<long, Dictionary<string, StorageEntity>>();
         }
         public string GetEntityNames(long userId)
         {
