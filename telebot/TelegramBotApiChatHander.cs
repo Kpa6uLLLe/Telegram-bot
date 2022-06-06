@@ -24,7 +24,8 @@ namespace telebot
             botClient = new TelegramBotClient(token);
 
             Start();
-            Console.ReadLine();
+
+            Console.WriteLine("Started");
             Stop();
 
         }
@@ -68,7 +69,6 @@ namespace telebot
                     receiverOptions,
                     cancellationToken
                 );
-            Console.WriteLine("Started");
 
         }
         private static CustomUpdate ConvertUpdate(Update update)

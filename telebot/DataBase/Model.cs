@@ -32,9 +32,24 @@ namespace telebot
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
-                .HasAlternateKey(u => u.UserId);
+               .HasAlternateKey(u => u.UserId);
+
             modelBuilder.Entity<Category>()
-                .HasAlternateKey(u => u.Name);
+                .HasAlternateKey(c => new { c.Id, c.Name })
+                .HasName($"AK_Id_Name");
+            modelBuilder.Entity<Link>()
+                .HasOne(l => l.Category)
+                .WithMany(c => c.Links)
+                .HasPrincipalKey(c => c.Name);
+
+
+
+            var cascadeFKs = modelBuilder.Model.GetEntityTypes()
+        .SelectMany(t => t.GetForeignKeys())
+        .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
+            foreach (var fk in cascadeFKs)
+                fk.DeleteBehavior = DeleteBehavior.Restrict;
+            base.OnModelCreating(modelBuilder);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlServer(DbPath);
@@ -50,9 +65,13 @@ namespace telebot
     }
     public class Category
     {
+        [Key]
+        public long Id { get; set; }
         public string Name { get; set; } = "";
-        
+        public List<Link> Links { get; set; }
+
         public User User { get; set; }
+
 
 
     }

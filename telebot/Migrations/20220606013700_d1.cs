@@ -4,7 +4,7 @@
 
 namespace telebot.Migrations
 {
-    public partial class R0 : Migration
+    public partial class d1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

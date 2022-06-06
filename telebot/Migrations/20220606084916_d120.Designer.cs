@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using telebot;
 
@@ -10,9 +11,10 @@ using telebot;
 namespace telebot.Migrations
 {
     [DbContext(typeof(ULinksContext))]
-    partial class ULinksContextModelSnapshot : ModelSnapshot
+    [Migration("20220606084916_d120")]
+    partial class d120
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -11,8 +11,8 @@ using telebot;
 namespace telebot.Migrations
 {
     [DbContext(typeof(ULinksContext))]
-    [Migration("20220602034220_R0")]
-    partial class R0
+    [Migration("20220606013520_d0")]
+    partial class d0
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,13 +25,23 @@ namespace telebot.Migrations
 
             modelBuilder.Entity("telebot.Category", b =>
                 {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("Name");
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("Id", "Name")
+                        .HasName("AK_Id_Name");
 
                     b.HasIndex("UserId");
 
@@ -99,7 +109,7 @@ namespace telebot.Migrations
                     b.HasOne("telebot.User", "User")
                         .WithMany("Categories")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -108,18 +118,24 @@ namespace telebot.Migrations
             modelBuilder.Entity("telebot.Link", b =>
                 {
                     b.HasOne("telebot.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryName");
+                        .WithMany("Links")
+                        .HasForeignKey("CategoryName")
+                        .HasPrincipalKey("Name");
 
                     b.HasOne("telebot.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("telebot.Category", b =>
+                {
+                    b.Navigation("Links");
                 });
 
             modelBuilder.Entity("telebot.User", b =>
