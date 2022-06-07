@@ -13,12 +13,14 @@ namespace telebot
         private IChat _chat;
         private Command currentCommand;
         private IStorage _storage;
+        private AppSettings _settings;
 
         public CommandHandler(IStorage storage)
         {
             _storage = storage;
             commandFactory = new CommandFactory();
             commandRepository = new CommandRepository();
+            _settings = new AppSettings();
         }
         public void SetIChat(IChat chat)
         {
@@ -92,7 +94,9 @@ namespace telebot
                         break;
                     default:
                         _storage.CreateNewUser(update.Message.Chat.Id, update.Message.Chat.FirstName, update.Message.Chat.LastName, currentCommand.category, currentCommand.link);
-                        currentCommand.Complete("Вы зарегистрированы");
+                        if (!_storage.UserExist(update.Message.Chat.Id))
+                            currentCommand.Error("Ошибка при регистрации. Введены некорректные данные или пользователь с таким именем уже существует");
+                        currentCommand.Complete($"Вы зарегистрированы, теперь вы можете пользоваться всеми функциями бота. Ваш логин для входа на сайт: {currentCommand.category}@{_settings.GetDomainName()}");
                         break;
 
                 }

@@ -12,6 +12,7 @@ namespace telebot
         {
             DBInit dBInit = new DBInit();
             IStorage storage = dBInit._storage;
+            //storage = new MemoryStorage();
             CommandHandler handler = new CommandHandler(storage);
             IChat chat = new TelegramBotApiChatHander(handler);
             chat.Start();
