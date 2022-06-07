@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace telebot
 {
-    public class ULinksContext : DbContext
+    public class ULinksContext : IdentityDbContext<AppIdentityUser, IdentityRole, string>
     {
         public DbSet<Category> Categories { get; set; }
-
-        public DbSet<User> Users { get; set; }
 
         public DbSet<Link> Links { get; set; }
         public string DbPath { get; set; }
@@ -21,18 +15,23 @@ namespace telebot
         {
             AppSettings settings = new AppSettings();
             DbPath = settings.GetDBPath();
-
         }
         public ULinksContext(DbContextOptions options)
         {
             AppSettings settings = new AppSettings();
             DbPath = settings.GetDBPath();
         }
-
+        public ULinksContext(DbContextOptions<ULinksContext> options)
+        {
+            AppSettings settings = new AppSettings();
+            DbPath = settings.GetDBPath();
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-               .HasAlternateKey(u => u.UserId);
+            modelBuilder.Entity<AppIdentityUser>()
+                .HasKey(x => x.Id);
+            modelBuilder.Entity<AppIdentityUser>()
+                .HasAlternateKey(u => u.UserId);
 
             modelBuilder.Entity<Category>()
                 .HasAlternateKey(c => new { c.Id, c.Name })
@@ -49,7 +48,15 @@ namespace telebot
         .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
             foreach (var fk in cascadeFKs)
                 fk.DeleteBehavior = DeleteBehavior.Restrict;
+
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<AppIdentityUser>(b =>
+            {
+                b.ToTable("Users");
+                b.Property(e => e.Id).HasColumnName("LocalId");
+                b.Property(e => e.NormalizedUserName).HasColumnName("Nickname");
+                b.Property(e => e.PasswordHash).HasColumnName("Password");
+            });
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlServer(DbPath);
@@ -58,32 +65,20 @@ namespace telebot
     {
         public string Url { get; set; }
         public Category Category { get; set; }
-        public User User { get; set; }
+        public AppIdentityUser User { get; set; }
         [Key]
         public long Id { get; set; }
 
     }
     public class Category
     {
-        [Key]
         public long Id { get; set; }
-        public string Name { get; set; } = "";
+        public string? Name { get; set; } = "";
         public List<Link> Links { get; set; }
 
-        public User User { get; set; }
+        public AppIdentityUser User { get; set; }
 
 
 
     }
-    public class User
-    {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-
-        public List<Category> Categories { get; set; } = new();
-        public long UserId { get; set; }
-        public string Nickname { get; set; }
-        public string Password { get; set; }
-
-    }
-    }
+}

@@ -24,14 +24,6 @@ namespace telebot
         private List<string> GetLinksDB(string categoryName, long userId)
         {
             List<string> list = new List<string>(0);
-            var links = _context.Links.
-                Where(l => (l.User.UserId == userId && l.Category.Name == categoryName))
-                .ToList();
-            foreach (Link link in links)
-            {
-                list.Add(link.Url);
-            }
-            return list;
             Open();
             string sqlc = $"SELECT Url FROM Links WHERE CategoryName = '{categoryName}' AND UserId = '{userId}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
@@ -158,13 +150,24 @@ namespace telebot
             List<string> linkList = storageEntity.GetLinks();
             if (!UserExist(userId))
                 return;
-            if(!CategoryExist(storageEntity.Name,userId))
+            if (!CategoryExist(storageEntity.Name, userId))
             {
-                Open(); 
-                string sqlc = $"INSERT INTO Categories(Name,UserId) VALUES ('{storageEntity.Name}','{userId}')";
+                Open();
+                string sqlc = $"SELECT UserId FROM Users WHERE UserId = '{userId}'";
+                //$"INSERT INTO Categories(Name,UserId) VALUES ('{storageEntity.Name}','{userId}')";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                if (!reader.HasRows)
+                {
+                    reader.Close();
+                    Close();
+                    return;
+                }
+                reader.Close();
+                sqlc = $"INSERT INTO Categories(Name,UserId) VALUES ('{storageEntity.Name}','{userId}')";
+                sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
-                foreach(string link in linkList)
+                foreach (string link in linkList)
                 {
                     sqlc = $"INSERT INTO Links(Url,CategoryName,UserId) VALUES ('{link}','{storageEntity.Name}','{userId}')";
                     sqlCommand = new SqlCommand(sqlc, _connection);
@@ -213,12 +216,8 @@ namespace telebot
             if (!UserExist(userId))
             {
                 Open();
-                 
-                string sqlc = "SET IDENTITY_INSERT Users ON";
+                string sqlc = $"INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password,LocalId) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}','{nickname}');INSERT INTO Users DEFAULT VALUES;";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
-                sqlCommand.ExecuteNonQuery();
-                sqlc = $"INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}')";
-                sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
                 Close();
 
