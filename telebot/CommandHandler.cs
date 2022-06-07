@@ -92,6 +92,8 @@ namespace telebot
                         break;
                     default:
                         _storage.CreateNewUser(update.Message.Chat.Id, update.Message.Chat.FirstName, update.Message.Chat.LastName, currentCommand.category, currentCommand.link);
+                        if (!_storage.UserExist(update.Message.Chat.Id))
+                            currentCommand.Error("Ошибка при регистрации. Введены некорректные данные или пользователь с таким именем уже существует");
                         currentCommand.Complete("Вы зарегистрированы");
                         break;
 

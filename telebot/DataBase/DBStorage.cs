@@ -62,7 +62,22 @@ namespace telebot
             if (_connection.State == System.Data.ConnectionState.Open)
                 _connection.Close();
         }
-        public bool UserExist(long userId)
+        public bool UserExist(string nickname)
+        {
+            nickname = nickname.ToLower();
+            bool result = true;
+            Open();
+            string sqlc = $"SELECT UserId FROM Users WHERE Nickname = '{nickname}'";
+            SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
+            SqlDataReader reader = sqlCommand.ExecuteReader();
+            if (!reader.HasRows)
+                result = false;
+
+            reader.Close();
+            Close();
+            return result;
+        }
+            public bool UserExist(long userId)
         {
             bool result = true;
             Open();
@@ -213,8 +228,13 @@ namespace telebot
         }
         public void CreateNewUser(long userId, string firstName, string lastName, string nickname, string password)
         {
+           nickname = nickname.ToLower();
+            if (UserExist(nickname) || UserExist(userId))
+                return;
             if (!UserExist(userId))
             {
+                AppSettings settings = new AppSettings();
+                string domain = settings.GetDomainName();
                 Open();
                 string sqlc = $"INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password,LocalId) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}','{nickname}');INSERT INTO Users DEFAULT VALUES;";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
