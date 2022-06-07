@@ -7,10 +7,8 @@ namespace telebot
     {
         public string? FirstName { get; set; } = string.Empty;
         public string? LastName { get; set; } = string.Empty;
-
-        public List<Category>? Categories { get; set; } = new();
-        public List<Link>? Links { get; set; } = new();
-        [Key]
+        public string? Password { get; set; } = string.Empty;
+        public string? Nickname { get; set; } = string.Empty;
         public long? UserId { get; set; }
     }
 }

@@ -10,24 +10,24 @@ namespace tgBOT.Data
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<Link> Links { get; set; }
+        public DbSet<User> Users { get; set; }
         public string DbPath { get; set; }
 
-        public ApplicationDbContext()
+    public ApplicationDbContext()
+    {
+        DbPath = "Server=WIN-I8JP04LM8ST\\SQLEXPRESS;Database=tgBOTUserData;Trusted_Connection=True;MultipleActiveResultSets=true";
+    }
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    {
+        DbPath = "Server=WIN-I8JP04LM8ST\\SQLEXPRESS;Database=tgBOTUserData;Trusted_Connection=True;MultipleActiveResultSets=true";
+    }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            DbPath = "Server=WIN-I8JP04LM8ST\\SQLEXPRESS;Database=tgBOTUserData;Trusted_Connection=True;MultipleActiveResultSets=true";
-        }
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        {
-            DbPath = "Server=WIN-I8JP04LM8ST\\SQLEXPRESS;Database=tgBOTUserData;Trusted_Connection=True;MultipleActiveResultSets=true";
-        }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            
             modelBuilder.Entity<AppIdentityUser>()
-                .HasAlternateKey(u => u.UserId);
+                .HasKey(x => x.Id);
 
             modelBuilder.Entity<Category>()
-                .HasAlternateKey(c => new {c.Id,c.Name})
+                .HasAlternateKey(c => new { c.Id, c.Name })
                 .HasName($"AK_Id_Name");
             modelBuilder.Entity<Link>()
                 .HasOne(l => l.Category)
@@ -41,15 +41,8 @@ namespace tgBOT.Data
         .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade);
             foreach (var fk in cascadeFKs)
                 fk.DeleteBehavior = DeleteBehavior.Restrict;
-           
+
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<AppIdentityUser>(b =>
-            {
-                b.ToTable("Users");
-                b.Property(e => e.Id).HasColumnName("LocalId");
-                b.Property(e => e.NormalizedUserName).HasColumnName("Nickname");
-                b.Property(e => e.PasswordHash).HasColumnName("Password");
-            });
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseSqlServer(DbPath);
@@ -58,7 +51,7 @@ namespace tgBOT.Data
     {
         public string Url { get; set; }
         public Category Category { get; set; }
-        public AppIdentityUser User { get; set; }
+        public User User { get; set; }
         [Key]
         public long Id { get; set; }
 
@@ -69,9 +62,21 @@ namespace tgBOT.Data
         public string? Name { get; set; } = "";
         public List<Link> Links { get; set; }
 
-        public AppIdentityUser User { get; set; }
+        public User User { get; set; }
 
 
 
+    }
+    public class User
+    {
+        public string? FirstName { get; set; } = string.Empty;
+        public string? LastName { get; set; } = string.Empty;
+        public string? Password { get; set; } = string.Empty;
+        public string? Nickname { get; set; } = string.Empty;
+        public List<Category>? Categories { get; set; } = new();
+        public List<Link>? Links { get; set; } = new();
+
+        [Key]
+        public long? UserId { get; set; }
     }
 }

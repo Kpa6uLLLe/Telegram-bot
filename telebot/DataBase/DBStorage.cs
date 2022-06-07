@@ -7,6 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlTypes;
 using System.Data.SqlClient;
+using System;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.Extensions.Identity.Core;
+using Microsoft.Extensions.Options;
 namespace telebot
 {
     public class DBSqlServerStorage : IStorage
@@ -228,17 +234,27 @@ namespace telebot
         }
         public void CreateNewUser(long userId, string firstName, string lastName, string nickname, string password)
         {
-           nickname = nickname.ToLower();
-            if (UserExist(nickname) || UserExist(userId))
+            string localNickname = nickname.ToLower();
+            if (UserExist(localNickname) || UserExist(userId))
                 return;
             if (!UserExist(userId))
             {
                 AppSettings settings = new AppSettings();
                 string domain = settings.GetDomainName();
+                string email = nickname + "@" + domain;
                 Open();
-                string sqlc = $"INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password,LocalId) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}','{nickname}');INSERT INTO Users DEFAULT VALUES;";
+                string sqlc = $"DELETE FROM AspNetUsers WHERE Id = '{nickname} {userId.ToString()}'";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
+                sqlCommand.ExecuteScalar();
+                sqlc =
+                        $"INSERT INTO AspNetUsers(AccessFailedCount,TwoFactorEnabled,LockoutEnabled,PhoneNumberConfirmed, Id ,EmailConfirmed,BotAPIUserId,FirstName,LastName,Nickname,Password,UserName,NormalizedUserName,Email,NormalizedEmail,PasswordHash,SecurityStamp) VALUES ('{0}','FALSE','TRUE','FALSE','{nickname} {userId.ToString()}','FALSE','{userId}','{firstName}','{lastName}','{nickname}','{password}','{email}','{email.ToUpper()}','{email}','{email.ToUpper()}','{HashingUnhashing.HashPassword(password)}','{DateTime.Now.ToString()}');";
+
+                sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
+                sqlc = $"SET IDENTITY_INSERT Users ON;INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}');SET IDENTITY_INSERT Users OFF";
+                sqlCommand = new SqlCommand(sqlc, _connection);
+                sqlCommand.ExecuteScalar();
+
                 Close();
 
             }

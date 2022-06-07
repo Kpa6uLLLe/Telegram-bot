@@ -12,8 +12,8 @@ using tgBOT.Data;
 namespace tgBOT.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220605183813_D1")]
-    partial class D1
+    [Migration("20220607141804_D0")]
+    partial class D0
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -160,8 +160,7 @@ namespace tgBOT.Migrations
             modelBuilder.Entity("tgBOT.Data.AppIdentityUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("LocalId");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -189,18 +188,22 @@ namespace tgBOT.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Nickname")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("Nickname");
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Password");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
@@ -214,7 +217,7 @@ namespace tgBOT.Migrations
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<long>("UserId")
+                    b.Property<long?>("UserId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("UserName")
@@ -223,17 +226,15 @@ namespace tgBOT.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("UserId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[Nickname] IS NOT NULL");
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("tgBOT.Data.Category", b =>
@@ -248,8 +249,8 @@ namespace tgBOT.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -269,23 +270,48 @@ namespace tgBOT.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
-                    b.Property<long>("CategoryId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryName");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Links");
+                });
+
+            modelBuilder.Entity("tgBOT.Data.User", b =>
+                {
+                    b.Property<long?>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("UserId"), 1L, 1);
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nickname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -341,9 +367,11 @@ namespace tgBOT.Migrations
 
             modelBuilder.Entity("tgBOT.Data.Category", b =>
                 {
-                    b.HasOne("tgBOT.Data.AppIdentityUser", "User")
+                    b.HasOne("tgBOT.Data.User", "User")
                         .WithMany("Categories")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -352,28 +380,29 @@ namespace tgBOT.Migrations
                 {
                     b.HasOne("tgBOT.Data.Category", "Category")
                         .WithMany("Links")
-                        .HasForeignKey("CategoryId")
+                        .HasForeignKey("CategoryName")
+                        .HasPrincipalKey("Name");
+
+                    b.HasOne("tgBOT.Data.User", "User")
+                        .WithMany("Links")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("tgBOT.Data.AppIdentityUser", "User")
-                        .WithMany("Links")
-                        .HasForeignKey("UserId");
 
                     b.Navigation("Category");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("tgBOT.Data.AppIdentityUser", b =>
+            modelBuilder.Entity("tgBOT.Data.Category", b =>
                 {
-                    b.Navigation("Categories");
-
                     b.Navigation("Links");
                 });
 
-            modelBuilder.Entity("tgBOT.Data.Category", b =>
+            modelBuilder.Entity("tgBOT.Data.User", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Links");
                 });
 #pragma warning restore 612, 618
