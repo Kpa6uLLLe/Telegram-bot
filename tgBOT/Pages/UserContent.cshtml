@@ -16,16 +16,17 @@
 </head>
 <body>
     <header>
-<p>Table: </p>
-<h2>Список ссылок</h2>
-<table>
-    
-    
             @{
                 string username = User.Identity.Name;
                 int max=0;
                 string DOMAIN = "tgBot.com";
-            }
+            
+<p>Table: </p>
+<h2>Список ссылок для @username.Substring(0,username.LastIndexOf('@'))</h2>
+<table>
+    
+    
+            
     <tr>
     @foreach (var category in this.Model.UserCategories)
     {
@@ -60,6 +61,7 @@
     }
  
 </table>
+}
 </header>
 </body>
 </html>
