@@ -243,11 +243,11 @@ namespace telebot
                 string domain = settings.GetDomainName();
                 string email = nickname + "@" + domain;
                 Open();
-                string sqlc = $"DELETE FROM AspNetUsers WHERE Id = '{nickname} {userId.ToString()}'";
+                string sqlc = $"DELETE FROM AspNetUsers WHERE Id = '{userId.ToString()}'";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteScalar();
                 sqlc =
-                        $"INSERT INTO AspNetUsers(AccessFailedCount,TwoFactorEnabled,LockoutEnabled,PhoneNumberConfirmed, Id ,EmailConfirmed,BotAPIUserId,FirstName,LastName,Nickname,Password,UserName,NormalizedUserName,Email,NormalizedEmail,PasswordHash,SecurityStamp) VALUES ('{0}','FALSE','TRUE','FALSE','{nickname} {userId.ToString()}','FALSE','{userId}','{firstName}','{lastName}','{nickname}','{password}','{email}','{email.ToUpper()}','{email}','{email.ToUpper()}','{HashingUnhashing.HashPassword(password)}','{DateTime.Now.ToString()}');";
+                        $"INSERT INTO AspNetUsers(AccessFailedCount,TwoFactorEnabled,LockoutEnabled,PhoneNumberConfirmed, Id ,EmailConfirmed,BotAPIUserId,FirstName,LastName,Nickname,Password,UserName,NormalizedUserName,Email,NormalizedEmail,PasswordHash,SecurityStamp) VALUES ('{0}','FALSE','TRUE','FALSE','{userId.ToString()}','FALSE','{userId}','{firstName}','{lastName}','{nickname}','{password}','{email}','{email.ToUpper()}','{email}','{email.ToUpper()}','{HashingUnhashing.HashPassword(password)}','{DateTime.Now.ToString()}');";
 
                 sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
