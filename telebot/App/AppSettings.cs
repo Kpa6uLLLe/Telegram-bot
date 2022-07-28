@@ -8,13 +8,16 @@ namespace telebot
 {
     public class AppSettings
     {
+        //TODO: singleton
         private AppSettingsForm settings;
         internal class AppSettingsForm
         {
             [Newtonsoft.Json.JsonProperty("token")]
-            public string token { get; set; }
+            public string Token { get; set; }
             [Newtonsoft.Json.JsonProperty("UsersDataBase")]
             public string DBsettings { get; set; }
+            [Newtonsoft.Json.JsonProperty("DomainName")]
+            public string DomainName { get; set; }
         }
 
         public AppSettings()
@@ -29,11 +32,15 @@ namespace telebot
 
         public string GetToken()
         {
-            return settings.token;
+            return settings.Token;
         }
         public string GetDBPath()
         {
             return settings.DBsettings;
+        }
+        public string GetDomainName()
+        {
+            return settings.DomainName;
         }
 
     }

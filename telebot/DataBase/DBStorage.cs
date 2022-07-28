@@ -7,22 +7,30 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Data.SqlTypes;
 using System.Data.SqlClient;
+using System;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.Extensions.Identity.Core;
+using Microsoft.Extensions.Options;
 namespace telebot
 {
     public class DBSqlServerStorage : IStorage
     {
-        private Dictionary<long, Dictionary<string, StorageEntity>> _entities = new Dictionary<long, Dictionary<string, StorageEntity>>();
+        
         private SqlConnection _connection;
         private const string ALL_LINKS = "Все";
+        private ULinksContext _context;
 
         public DBSqlServerStorage(SqlConnection sqlConnection)
         {
             _connection = sqlConnection;
+            _context = new ULinksContext();
         }
         private List<string> GetLinksDB(string categoryName, long userId)
         {
-            Open();
             List<string> list = new List<string>(0);
+            Open();
             string sqlc = $"SELECT Url FROM Links WHERE CategoryName = '{categoryName}' AND UserId = '{userId}'";
             SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
             SqlDataReader reader = sqlCommand.ExecuteReader();
@@ -60,7 +68,22 @@ namespace telebot
             if (_connection.State == System.Data.ConnectionState.Open)
                 _connection.Close();
         }
-        public bool UserExist(long userId)
+        public bool UserExist(string nickname)
+        {
+            nickname = nickname.ToLower();
+            bool result = true;
+            Open();
+            string sqlc = $"SELECT UserId FROM Users WHERE Nickname = '{nickname}'";
+            SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
+            SqlDataReader reader = sqlCommand.ExecuteReader();
+            if (!reader.HasRows)
+                result = false;
+
+            reader.Close();
+            Close();
+            return result;
+        }
+            public bool UserExist(long userId)
         {
             bool result = true;
             Open();
@@ -104,7 +127,7 @@ namespace telebot
 
         public Dictionary<long, Dictionary<string, StorageEntity>> GetEntityList()
         {
-            return _entities;
+            return new Dictionary<long, Dictionary<string, StorageEntity>>();
         }
         public string GetEntityNames(long userId)
         {
@@ -148,13 +171,24 @@ namespace telebot
             List<string> linkList = storageEntity.GetLinks();
             if (!UserExist(userId))
                 return;
-            if(!CategoryExist(storageEntity.Name,userId))
+            if (!CategoryExist(storageEntity.Name, userId))
             {
-                Open(); 
-                string sqlc = $"INSERT INTO Categories(Name,UserId) VALUES ('{storageEntity.Name}','{userId}')";
+                Open();
+                string sqlc = $"SELECT UserId FROM Users WHERE UserId = '{userId}'";
+                //$"INSERT INTO Categories(Name,UserId) VALUES ('{storageEntity.Name}','{userId}')";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                if (!reader.HasRows)
+                {
+                    reader.Close();
+                    Close();
+                    return;
+                }
+                reader.Close();
+                sqlc = $"INSERT INTO Categories(Name,UserId) VALUES ('{storageEntity.Name}','{userId}')";
+                sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
-                foreach(string link in linkList)
+                foreach (string link in linkList)
                 {
                     sqlc = $"INSERT INTO Links(Url,CategoryName,UserId) VALUES ('{link}','{storageEntity.Name}','{userId}')";
                     sqlCommand = new SqlCommand(sqlc, _connection);
@@ -200,16 +234,27 @@ namespace telebot
         }
         public void CreateNewUser(long userId, string firstName, string lastName, string nickname, string password)
         {
+            string localNickname = nickname.ToLower();
+            if (UserExist(localNickname) || UserExist(userId))
+                return;
             if (!UserExist(userId))
             {
+                AppSettings settings = new AppSettings();
+                string domain = settings.GetDomainName();
+                string email = nickname + "@" + domain;
                 Open();
-                 
-                string sqlc = "SET IDENTITY_INSERT Users ON";
+                string sqlc = $"DELETE FROM AspNetUsers WHERE Id = '{userId.ToString()}'";
                 SqlCommand sqlCommand = new SqlCommand(sqlc, _connection);
-                sqlCommand.ExecuteNonQuery();
-                sqlc = $"INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}')";
+                sqlCommand.ExecuteScalar();
+                sqlc =
+                        $"INSERT INTO AspNetUsers(AccessFailedCount,TwoFactorEnabled,LockoutEnabled,PhoneNumberConfirmed, Id ,EmailConfirmed,BotAPIUserId,FirstName,LastName,Nickname,Password,UserName,NormalizedUserName,Email,NormalizedEmail,PasswordHash,SecurityStamp) VALUES ('{0}','FALSE','TRUE','FALSE','{userId.ToString()}','FALSE','{userId}','{firstName}','{lastName}','{nickname}','{password}','{email}','{email.ToUpper()}','{email}','{email.ToUpper()}','{HashingUnhashing.HashPassword(password)}','{DateTime.Now.ToString()}');";
+
                 sqlCommand = new SqlCommand(sqlc, _connection);
                 sqlCommand.ExecuteNonQuery();
+                sqlc = $"SET IDENTITY_INSERT Users ON;INSERT INTO Users(UserId,FirstName,LastName,Nickname,Password) VALUES ('{userId}','{firstName}','{lastName}','{nickname}','{password}');SET IDENTITY_INSERT Users OFF";
+                sqlCommand = new SqlCommand(sqlc, _connection);
+                sqlCommand.ExecuteScalar();
+
                 Close();
 
             }

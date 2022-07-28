@@ -3,17 +3,19 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using telebot;
+using tgBOT.Data;
 
 #nullable disable
 
-namespace telebot.Migrations
+namespace tgBOT.Migrations
 {
-    [DbContext(typeof(ULinksContext))]
-    partial class ULinksContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20220607141804_D0")]
+    partial class D0
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,11 +157,10 @@ namespace telebot.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("telebot.AppIdentityUser", b =>
+            modelBuilder.Entity("tgBOT.Data.AppIdentityUser", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("LocalId");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -187,18 +188,22 @@ namespace telebot.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Nickname")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("Nickname");
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Password");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
@@ -213,7 +218,6 @@ namespace telebot.Migrations
                         .HasColumnType("bit");
 
                     b.Property<long?>("UserId")
-                        .IsRequired()
                         .HasColumnType("bigint");
 
                     b.Property<string>("UserName")
@@ -222,20 +226,18 @@ namespace telebot.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("UserId");
-
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[Nickname] IS NOT NULL");
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("telebot.Category", b =>
+            modelBuilder.Entity("tgBOT.Data.Category", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -247,9 +249,8 @@ namespace telebot.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -261,7 +262,7 @@ namespace telebot.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("telebot.Link", b =>
+            modelBuilder.Entity("tgBOT.Data.Link", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -276,9 +277,8 @@ namespace telebot.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -287,6 +287,31 @@ namespace telebot.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Links");
+                });
+
+            modelBuilder.Entity("tgBOT.Data.User", b =>
+                {
+                    b.Property<long?>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long?>("UserId"), 1L, 1);
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nickname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -300,7 +325,7 @@ namespace telebot.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("telebot.AppIdentityUser", null)
+                    b.HasOne("tgBOT.Data.AppIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -309,7 +334,7 @@ namespace telebot.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("telebot.AppIdentityUser", null)
+                    b.HasOne("tgBOT.Data.AppIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -324,7 +349,7 @@ namespace telebot.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("telebot.AppIdentityUser", null)
+                    b.HasOne("tgBOT.Data.AppIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -333,16 +358,16 @@ namespace telebot.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("telebot.AppIdentityUser", null)
+                    b.HasOne("tgBOT.Data.AppIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("telebot.Category", b =>
+            modelBuilder.Entity("tgBOT.Data.Category", b =>
                 {
-                    b.HasOne("telebot.AppIdentityUser", "User")
+                    b.HasOne("tgBOT.Data.User", "User")
                         .WithMany("Categories")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -351,14 +376,14 @@ namespace telebot.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("telebot.Link", b =>
+            modelBuilder.Entity("tgBOT.Data.Link", b =>
                 {
-                    b.HasOne("telebot.Category", "Category")
+                    b.HasOne("tgBOT.Data.Category", "Category")
                         .WithMany("Links")
                         .HasForeignKey("CategoryName")
                         .HasPrincipalKey("Name");
 
-                    b.HasOne("telebot.AppIdentityUser", "User")
+                    b.HasOne("tgBOT.Data.User", "User")
                         .WithMany("Links")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -369,15 +394,15 @@ namespace telebot.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("telebot.AppIdentityUser", b =>
+            modelBuilder.Entity("tgBOT.Data.Category", b =>
                 {
-                    b.Navigation("Categories");
-
                     b.Navigation("Links");
                 });
 
-            modelBuilder.Entity("telebot.Category", b =>
+            modelBuilder.Entity("tgBOT.Data.User", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Links");
                 });
 #pragma warning restore 612, 618
