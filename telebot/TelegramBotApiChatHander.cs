@@ -14,7 +14,6 @@ namespace telebot
         private TelegramBotClient botClient;
         private ReceiverOptions receiverOptions;
         private CommandHandler _commandHandler;
-        private CustomUpdate _update;
         public TelegramBotApiChatHander(CommandHandler commandHandler)
         {
             CustomUpdate _update = new CustomUpdate();
@@ -25,7 +24,7 @@ namespace telebot
             botClient = new TelegramBotClient(token);
 
             Start();
-            Console.ReadLine();
+            Console.ReadKey();
             Stop();
 
         }
@@ -33,17 +32,25 @@ namespace telebot
         {
             var response = _commandHandler.ProcessNewMessage(update);
             if (response.OK)
-                Console.WriteLine($"Successfully handled '{response.commandName}' from {update.Message.Chat.FirstName} {_update.Message.Chat.LastName}");
+            {
+                Console.WriteLine($"Successfully handled '{response.commandName} {response.category} {response.link}' from {update.Message.Chat.FirstName} {update.Message.Chat.LastName}");
+                await PostMessageToChat(response.message, update);
+            }
             else
-                Console.WriteLine($"Incorrect input in chat#{_update.Message.Chat.Id}");
+            {
+                Console.WriteLine($"Incorrect input in chat#{update.Message.Chat.Id}");
+                Console.WriteLine(response.commandError.GetErrorInfo());
+                if(response.commandError.errorDescription != string.Empty)
+                await PostMessageToChat(response.commandError.GetMessageForUser(), update);
+            }
 
 
         }
 
-        public async Task PostMessageToChat(string message)
+        public async Task PostMessageToChat(string message, CustomUpdate update)
         {
-            await botClient.SendTextMessageAsync(_update.Message.Chat,message);
-            Console.WriteLine($"Sent message: '{_update.Message.Text}' to {_update.Message.Chat.LastName} {_update.Message.Chat.LastName} in chat#{_update.Message.Chat.Id}");
+            await botClient.SendTextMessageAsync(update.Message.Chat,message);
+            Console.WriteLine($"Sent message: '{message}' to {update.Message.Chat.FirstName} {update.Message.Chat.LastName} in chat#{update.Message.Chat.Id}");
         }
 
         public async Task Start()
@@ -62,7 +69,6 @@ namespace telebot
                     cancellationToken
                 );
             Console.WriteLine("Started");
-
         }
         private static CustomUpdate ConvertUpdate(Update update)
         {
@@ -73,7 +79,7 @@ namespace telebot
         }
         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            _update = ConvertUpdate(update);
+            CustomUpdate _update = ConvertUpdate(update);
             if (_update.Type == UpdateType.Message && _update.Message.Type == MessageType.Text && _update.Message.Text != null)
                 await NewChatMessageReceived(_update);
             System.Threading.Thread.Sleep(500);
@@ -93,6 +99,7 @@ namespace telebot
         }
         public void Stop()
         {
+            
             cts.Cancel();
 
         }
